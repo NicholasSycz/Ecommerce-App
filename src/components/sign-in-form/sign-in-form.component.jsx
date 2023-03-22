@@ -1,8 +1,8 @@
 import { useState } from "react";
 import FormInput from "../form-input/form-input.component";
 import Button from "../button/button.component";
+
 import {
-  createUserDocumentFromAuth,
   signInWithGooglePopup,
   signInAuthUserWithEmailAndPassword,
 } from "../../utils/firebase/firebase.utils";
@@ -18,9 +18,33 @@ const SignInForm = () => {
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { email, password } = formFields;
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const signInWithGoogle = async () => {
-    const { user } = await signInWithGooglePopup();
-    const userDocRef = await createUserDocumentFromAuth(user);
+    await signInWithGooglePopup();
+  };
+
+  const submitForm = async () => {
+    setIsLoading(true);
+    try {
+      const { user } = await signInAuthUserWithEmailAndPassword(
+        email,
+        password
+        );      
+        resetFormFields();
+      } catch (error) {
+      switch (error.code) {
+        case "auth/wrong-password":
+          alert("Incorrect Password");
+          break;
+        case "auth/user-not-found":
+          alert(`No user associated with email ${email}`);
+          break;
+          default:
+            console.log(error);
+          }
+    }
+    setIsLoading(false);
   };
 
   const handleFormInputChange = (event) => {
@@ -29,31 +53,13 @@ const SignInForm = () => {
     setFormFields({ ...formFields, [name]: value });
   };
 
-  const resetFormFields = () => {
-    setFormFields(defaultFormFields);
-  };
-
   const handleFormSubmit = async (event) => {
     event.preventDefault();
-
-    try {
-      const response = await signInAuthUserWithEmailAndPassword(
-        email,
-        password
-      );
-      resetFormFields();
-    } catch (error) {
-      switch (error.code) {
-        case "auth/wrong-password":
-          alert("Incorrect Password");
-          break;
-        case "auth/user-not-found":
-          alert("No user associated with this email");
-          break;
-        default:
-          console.log(error);
-      }
-    }
+    submitForm();
+  };
+  
+  const resetFormFields = () => {
+    setFormFields(defaultFormFields);
   };
 
   return (
@@ -82,8 +88,8 @@ const SignInForm = () => {
           }}
         />
         <div className="buttons-container">
-        <Button type="submit">Sign In</Button>
-        <Button type="button" buttonType="google" onClick={signInWithGoogle}>Google Sign In</Button>
+        <Button type="submit" disabled={isLoading}>{isLoading ? "Signing In..." : "Sign In"}</Button>
+        <Button type="button" disabled={isLoading} buttonType="google" onClick={signInWithGoogle}>Google Sign In</Button>
         </div>
       </form>
     </div>
