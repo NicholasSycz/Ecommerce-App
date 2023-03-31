@@ -1,13 +1,13 @@
 import { useState } from "react";
 import FormInput from "../form-input/form-input.component";
-import Button from "../button/button.component";
+import Button, { BUTTON_TYPE_CLASSES } from "../button/button.component";
 
 import {
   signInWithGooglePopup,
   signInAuthUserWithEmailAndPassword,
 } from "../../utils/firebase/firebase.utils";
 
-import './sign-in-form.styles.scss';
+import { ButtonsContainer, SignUpContainer } from "./sign-in-form.styles";
 
 const defaultFormFields = {
   email: "",
@@ -30,9 +30,9 @@ const SignInForm = () => {
       const { user } = await signInAuthUserWithEmailAndPassword(
         email,
         password
-        );      
-        resetFormFields();
-      } catch (error) {
+      );
+      resetFormFields();
+    } catch (error) {
       switch (error.code) {
         case "auth/wrong-password":
           alert("Incorrect Password");
@@ -40,9 +40,9 @@ const SignInForm = () => {
         case "auth/user-not-found":
           alert(`No user associated with email ${email}`);
           break;
-          default:
-            console.log(error);
-          }
+        default:
+          console.log(error);
+      }
     }
     setIsLoading(false);
   };
@@ -57,13 +57,13 @@ const SignInForm = () => {
     event.preventDefault();
     submitForm();
   };
-  
+
   const resetFormFields = () => {
     setFormFields(defaultFormFields);
   };
 
   return (
-    <div className="sign-up-container">
+    <SignUpContainer>
       <h2>Already have an account?</h2>
       <span>Sign in with your email and password</span>
       <form onSubmit={handleFormSubmit}>
@@ -87,12 +87,21 @@ const SignInForm = () => {
             onChange: handleFormInputChange,
           }}
         />
-        <div className="buttons-container">
-        <Button type="submit" disabled={isLoading}>{isLoading ? "Signing In..." : "Sign In"}</Button>
-        <Button type="button" disabled={isLoading} buttonType="google" onClick={signInWithGoogle}>Google Sign In</Button>
-        </div>
+        <ButtonsContainer>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Signing In..." : "Sign In"}
+          </Button>
+          <Button
+            type={BUTTON_TYPE_CLASSES.base}
+            disabled={isLoading}
+            buttonType="google"
+            onClick={signInWithGoogle}
+          >
+            Google Sign In
+          </Button>
+        </ButtonsContainer>
       </form>
-    </div>
+    </SignUpContainer>
   );
 };
 
