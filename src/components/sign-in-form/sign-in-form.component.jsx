@@ -7,7 +7,7 @@ import {
   signInAuthUserWithEmailAndPassword,
 } from "../../utils/firebase/firebase.utils";
 
-import { ButtonsContainer, SignUpContainer } from "./sign-in-form.styles";
+import { ButtonsContainer, SignInContainer } from "./sign-in-form.styles";
 
 const defaultFormFields = {
   email: "",
@@ -18,90 +18,65 @@ const SignInForm = () => {
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { email, password } = formFields;
 
-  const [isLoading, setIsLoading] = useState(false);
+  const resetFormFields = () => {
+    setFormFields(defaultFormFields);
+  };
 
   const signInWithGoogle = async () => {
     await signInWithGooglePopup();
   };
 
-  const submitForm = async () => {
-    setIsLoading(true);
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
     try {
-      const { user } = await signInAuthUserWithEmailAndPassword(
-        email,
-        password
-      );
+      await signInAuthUserWithEmailAndPassword(email, password);
       resetFormFields();
     } catch (error) {
-      switch (error.code) {
-        case "auth/wrong-password":
-          alert("Incorrect Password");
-          break;
-        case "auth/user-not-found":
-          alert(`No user associated with email ${email}`);
-          break;
-        default:
-          console.log(error);
-      }
+      console.log('user sign in failed', error);
     }
-    setIsLoading(false);
   };
 
-  const handleFormInputChange = (event) => {
+  const handleChange = (event) => {
     const { name, value } = event.target;
 
     setFormFields({ ...formFields, [name]: value });
   };
 
-  const handleFormSubmit = async (event) => {
-    event.preventDefault();
-    submitForm();
-  };
-
-  const resetFormFields = () => {
-    setFormFields(defaultFormFields);
-  };
-
   return (
-    <SignUpContainer>
+    <SignInContainer>
       <h2>Already have an account?</h2>
       <span>Sign in with your email and password</span>
-      <form onSubmit={handleFormSubmit}>
+      <form onSubmit={handleSubmit}>
         <FormInput
-          label="Email"
-          htmlOptions={{
-            type: "email",
-            name: "email",
-            value: email,
-            required: "true",
-            onChange: handleFormInputChange,
-          }}
+          label='Email'
+          type='email'
+          required
+          onChange={handleChange}
+          name='email'
+          value={email}
         />
+
         <FormInput
-          label="Password"
-          htmlOptions={{
-            type: "password",
-            name: "password",
-            value: password,
-            required: "true",
-            onChange: handleFormInputChange,
-          }}
+          label='Password'
+          type='password'
+          required
+          onChange={handleChange}
+          name='password'
+          value={password}
         />
         <ButtonsContainer>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Signing In..." : "Sign In"}
-          </Button>
+          <Button type='submit'>Sign In</Button>
           <Button
-            type={BUTTON_TYPE_CLASSES.base}
-            disabled={isLoading}
-            buttonType="google"
+            buttonType={BUTTON_TYPE_CLASSES.google}
+            type='button'
             onClick={signInWithGoogle}
           >
-            Google Sign In
+            Sign In With Google
           </Button>
         </ButtonsContainer>
       </form>
-    </SignUpContainer>
+    </SignInContainer>
   );
 };
 

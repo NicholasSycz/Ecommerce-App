@@ -15,99 +15,86 @@ const defaultFormFields = {
   password: "",
   confirmPassword: "",
 };
-
 const SignUpForm = () => {
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { displayName, email, password, confirmPassword } = formFields;
-  
-  const [isLoading, setIsLoading] = useState(false);
-
-  const submitForm = async () => {
-    setIsLoading(true);
-    if (password !== confirmPassword) {
-        alert("Passwords do not match");
-        return;
-      }
-  
-      try {
-        const { user } = await createAuthUserWithEmailAndPassword(
-          email,
-          password
-        );
-  
-        await createUserDocumentFromAuth(user, { displayName });
-        
-        resetFormFields();
-      } catch (error) {
-        if (error.code === "auth/email-already-in-use") {
-          alert("Cannot create user, email already in use");
-        }
-        console.log("user creation error: ", error);
-      }
-      setIsLoading(false);
-  };
-
-  const handleFormInputChange = (event) => {
-    const { name, value } = event.target;
-
-    setFormFields({ ...formFields, [name]: value });
-  };
 
   const resetFormFields = () => {
     setFormFields(defaultFormFields);
   };
 
-  const handleFormSubmit = async (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    submitForm();
+
+    if (password !== confirmPassword) {
+      alert('passwords do not match');
+      return;
+    }
+
+    try {
+      const { user } = await createAuthUserWithEmailAndPassword(
+        email,
+        password
+      );
+
+      await createUserDocumentFromAuth(user, { displayName });
+      resetFormFields();
+    } catch (error) {
+      if (error.code === 'auth/email-already-in-use') {
+        alert('Cannot create user, email already in use');
+      } else {
+        console.log('user creation encountered an error', error);
+      }
+    }
+  };
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setFormFields({ ...formFields, [name]: value });
   };
 
   return (
     <SignUpContainer>
       <h2>Don't have an account?</h2>
       <span>Sign up with your email and password</span>
-      <form onSubmit={handleFormSubmit}>
+      <form onSubmit={handleSubmit}>
         <FormInput
-          label="Display Name"
-          htmlOptions={{
-            type: "text",
-            name: "displayName",
-            value: displayName,
-            required: "true",
-            onChange: handleFormInputChange,
-          }}
+          label='Display Name'
+          type='text'
+          required
+          onChange={handleChange}
+          name='displayName'
+          value={displayName}
         />
+
         <FormInput
-          label="Email"
-          htmlOptions={{
-            type: "email",
-            name: "email",
-            value: email,
-            required: "true",
-            onChange: handleFormInputChange,
-          }}
+          label='Email'
+          type='email'
+          required
+          onChange={handleChange}
+          name='email'
+          value={email}
         />
+
         <FormInput
-          label="Password"
-          htmlOptions={{
-            type: "password",
-            name: "password",
-            value: password,
-            required: "true",
-            onChange: handleFormInputChange,
-          }}
+          label='Password'
+          type='password'
+          required
+          onChange={handleChange}
+          name='password'
+          value={password}
         />
+
         <FormInput
-          label="Confirm Password"
-          htmlOptions={{
-            type: "password",
-            name: "confirmPassword",
-            value: confirmPassword,
-            required: "true",
-            onChange: handleFormInputChange,
-          }}
+          label='Confirm Password'
+          type='password'
+          required
+          onChange={handleChange}
+          name='confirmPassword'
+          value={confirmPassword}
         />
-        <Button type="submit" disabled={isLoading}>{isLoading ? "Signing Up..." : "Sign Up"}</Button>
+        <Button type='submit'>Sign Up</Button>
       </form>
     </SignUpContainer>
   );

@@ -1,13 +1,11 @@
-import { FormInputLabel, Group, Input } from "./form-input.styles";
+import { FormInputLabel, Input, Group } from './form-input.styles';
 
-const FormInput = ({ label, htmlOptions }) => {
+const FormInput = ({ label, ...otherProps }) => {
   return (
     <Group>
-      <Input {...htmlOptions} />
+      <Input {...otherProps} />
       {label && (
-        <FormInputLabel
-          shrink={htmlOptions.value.length}
-        >
+        <FormInputLabel shrink={otherProps.value.length}>
           {label}
         </FormInputLabel>
       )}
